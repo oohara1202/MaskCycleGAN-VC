@@ -1,3 +1,7 @@
+nohup.out
+STUDIES_reconst/
+STUDIES_reconst_preprocessed/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
