@@ -19,7 +19,7 @@ python data_preprocessing/preprocess_studies.py \
 ## Training
 
 ```bash
-python -W ignore::UserWarning -m mask_cyclegan_vc.train \
+python -W ignore::UserWarning -m mask_cyclegan_vc.train_studies \
     --name mask_cyclegan_vc_FStudent_Teacher \
     --seed 0 \
     --save_dir results/ \
@@ -36,5 +36,20 @@ python -W ignore::UserWarning -m mask_cyclegan_vc.train \
     --sample_rate 22050 \
     --num_frames 64 \
     --max_mask_len 25 \
-    --gpu_ids 1
+    --gpu_ids 0
+```
+
+## Testing
+
+```bash
+python -W ignore::UserWarning -m mask_cyclegan_vc.test_studies \
+    --name mask_cyclegan_vc_MStudent_Teacher \
+    --save_dir results/ \
+    --preprocessed_data_dir STUDIES_reconst_preprocessed/eval1 \
+    --gpu_ids 0 \
+    --speaker_A_id MStudent \
+    --speaker_B_id Teacher \
+    --ckpt_dir results/mask_cyclegan_vc_MStudent_Teacher/ckpts \
+    --load_epoch 700 \
+    --model_name generator_A2B
 ```

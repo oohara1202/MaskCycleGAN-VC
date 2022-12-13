@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Preprocesses .wav to Mel-spectrograms using Mel-GAN vocoder and saves them to pickle files.
-MelGAN vocoder: https://github.com/descriptinc/melgan-neurips
 """
 
 import os
@@ -20,21 +19,27 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data.dataset import Dataset
 
+from extract_logmelspectrogram import Audio2Mel
+
 SAMPLING_RATE = 22050  # Fixed sampling rate
 SAMPLING_RATE_ORIGIN = 48000  # STUDIESのデフォルトsr
 
 def normalize_mel(wavspath):
+    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     wav_files = glob.glob(os.path.join(
         wavspath, '**', '*.wav'), recursive=True)  # source_path
-    vocoder = torch.hub.load('descriptinc/melgan-neurips', 'load_melgan')
+    audio2mel = Audio2Mel().to(device)
 
     mel_list = list()
     for wavpath in tqdm(wav_files, desc='Preprocess wav to mel'):
         wav_orig, _ = librosa.load(wavpath, sr=SAMPLING_RATE_ORIGIN, mono=True)
         wav_orig = librosa.resample(wav_orig, SAMPLING_RATE_ORIGIN, SAMPLING_RATE)  # リサンプリング
-        spec = vocoder(torch.tensor([wav_orig]))
+        # https://github.com/descriptinc/melgan-neurips/blob/master/mel2wav/interface.py
+        wav_orig = torch.tensor([wav_orig]).unsqueeze(1)
+        spec = audio2mel(wav_orig.to(device)) 
 
         if spec.shape[-1] >= 64:    # training sample consists of 64 randomly cropped frames
+                                    # 時間次元が64以上か？
             mel_list.append(spec.cpu().detach().numpy()[0])
 
     mel_concatenated = np.concatenate(mel_list, axis=1)
