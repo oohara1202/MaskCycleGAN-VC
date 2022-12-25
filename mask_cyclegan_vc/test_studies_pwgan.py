@@ -32,9 +32,9 @@ class MaskCycleGANVCTesting(object):
 
         self.speaker_A_id = args.speaker_A_id
         self.speaker_B_id = args.speaker_B_id
-        # Initialize MelGAN-Vocoder used to decode Mel-spectrograms
-        self.vocoder = torch.hub.load(
-            'descriptinc/melgan-neurips', 'load_melgan')
+        # # Initialize MelGAN-Vocoder used to decode Mel-spectrograms
+        # self.vocoder = torch.hub.load(
+        #     'descriptinc/melgan-neurips', 'load_melgan')
         self.sample_rate = args.sample_rate
 
         # Initialize speakerA's dataset
@@ -94,35 +94,31 @@ class MaskCycleGANVCTesting(object):
                 real_A = real_A.to(self.device, dtype=torch.float)
                 fake_B = self.generator(real_A, torch.ones_like(real_A))
 
-                wav_fake_B = decode_melspectrogram(self.vocoder, fake_B[0].detach(
-                ).cpu(), self.dataset_B_mean, self.dataset_B_std).cpu()
+                denorm_converted = fake_B[0].detach().cpu() * self.dataset_B_std + self.dataset_B_mean
+                inputs = denorm_converted.unsqueeze(0)
 
-                wav_real_A = decode_melspectrogram(self.vocoder, real_A[0].detach(
-                ).cpu(), self.dataset_A_mean, self.dataset_A_std).cpu()
                 # 元ファイルと同じファイル名にする
-                basename = os.path.basename(filepath_list[i])
-                save_path = os.path.join(self.converted_audio_dir,
-                                         f"{basename.split('.')[0]}_converted.wav")
-                save_path_orig = os.path.join(self.converted_audio_dir,
-                                         f"{basename.split('.')[0]}_reconst.wav")
-                torchaudio.save(save_path, wav_fake_B, sample_rate=self.sample_rate)
-                torchaudio.save(save_path_orig, wav_real_A, sample_rate=self.sample_rate)
-            else:
-                real_B = sample
-                real_B = real_B.to(self.device, dtype=torch.float)
-                fake_A = self.generator(real_B, torch.ones_like(real_B))
+                basename_noext = os.path.splitext(os.path.basename(filepath_list[i]))[0]
+                save_path = os.path.join(self.converted_audio_dir, f'{basename_noext}.pickle')
+                with open(save_path, 'wb') as f:
+                    pickle.dump(inputs.cpu(), f)  # [1, n_mels, sequence]
 
-                wav_fake_A = decode_melspectrogram(self.vocoder, fake_A[0].detach(
-                ).cpu(), self.dataset_A_mean, self.dataset_A_std).cpu()
+            # else:
+            #     real_B = sample
+            #     real_B = real_B.to(self.daevice, dtype=torch.float)
+            #     fake_A = self.generator(real_B, torch.ones_like(real_B))
 
-                wav_real_B = decode_melspectrogram(self.vocoder, real_B[0].detach(
-                ).cpu(), self.dataset_B_mean, self.dataset_B_std).cpu()
+            #     wav_fake_A = decode_melspectrogram(self.vocoder, fake_A[0].detach(
+            #     ).cpu(), self.dataset_A_mean, self.dataset_A_std).cpu()
 
-                save_path = os.path.join(self.converted_audio_dir, f"{i}-converted_{self.speaker_B_id}_to_{self.speaker_A_id}.wav")
-                save_path_orig = os.path.join(self.converted_audio_dir,
-                                         f"{i}-original_{self.speaker_B_id}_to_{self.speaker_A_id}.wav")
-                torchaudio.save(save_path, wav_fake_A, sample_rate=self.sample_rate)
-                torchaudio.save(save_path_orig, wav_real_B, sample_rate=self.sample_rate)
+            #     wav_real_B = decode_melspectrogram(self.vocoder, real_B[0].detach(
+            #     ).cpu(), self.dataset_B_mean, self.dataset_B_std).cpu()
+
+            #     save_path = os.path.join(self.converted_audio_dir, f"{i}-converted_{self.speaker_B_id}_to_{self.speaker_A_id}.wav")
+            #     save_path_orig = os.path.join(self.converted_audio_dir,
+            #                              f"{i}-original_{self.speaker_B_id}_to_{self.speaker_A_id}.wav")
+            #     torchaudio.save(save_path, wav_fake_A, sample_rate=self.sample_rate)
+            #     torchaudio.save(save_path_orig, wav_real_B, sample_rate=self.sample_rate)
 
 
 if __name__ == "__main__":

@@ -43,8 +43,8 @@ class MaskCycleGANVCTraining(object):
         self.epochs_per_plot = args.epochs_per_plot
 
         # Initialize MelGAN-Vocoder used to decode Mel-spectrograms
-        self.vocoder = torch.hub.load(
-            'descriptinc/melgan-neurips', 'load_melgan')
+        # self.vocoder = torch.hub.load(
+        #     'descriptinc/melgan-neurips', 'load_melgan')
         self.sample_rate = args.sample_rate
 
         # Initialize speakerA's dataset
@@ -336,26 +336,26 @@ class MaskCycleGANVCTraining(object):
                         self.device, dtype=torch.float)
                     real_mel_full_B = real_mel_full_B.to(
                         self.device, dtype=torch.float)
-                    fake_mel_full_B = self.generator_A2B(
-                        real_mel_full_A, torch.ones_like(real_mel_full_A))
-                    fake_mel_full_A = self.generator_B2A(
-                        real_mel_full_B, torch.ones_like(real_mel_full_B))
-                    real_wav_full_A = decode_melspectrogram(self.vocoder, real_mel_full_A[0].detach(
-                    ).cpu(), self.dataset_A_mean, self.dataset_A_std).cpu()
-                    fake_wav_full_A = decode_melspectrogram(self.vocoder, fake_mel_full_A[0].detach(
-                    ).cpu(), self.dataset_A_mean, self.dataset_A_std).cpu()
-                    real_wav_full_B = decode_melspectrogram(self.vocoder, real_mel_full_B[0].detach(
-                    ).cpu(), self.dataset_B_mean, self.dataset_B_std).cpu()
-                    fake_wav_full_B = decode_melspectrogram(self.vocoder, fake_mel_full_B[0].detach(
-                    ).cpu(), self.dataset_B_mean, self.dataset_B_std).cpu()
-                    self.logger.log_audio(
-                        real_wav_full_A.T, "real_speaker_A_audio", self.sample_rate)
-                    self.logger.log_audio(
-                        fake_wav_full_A.T, "fake_speaker_A_audio", self.sample_rate)
-                    self.logger.log_audio(
-                        real_wav_full_B.T, "real_speaker_B_audio", self.sample_rate)
-                    self.logger.log_audio(
-                        fake_wav_full_B.T, "fake_speaker_B_audio", self.sample_rate)
+                    # fake_mel_full_B = self.generator_A2B(
+                    #     real_mel_full_A, torch.ones_like(real_mel_full_A))
+                    # fake_mel_full_A = self.generator_B2A(
+                    #     real_mel_full_B, torch.ones_like(real_mel_full_B))
+                    # real_wav_full_A = decode_melspectrogram(self.vocoder, real_mel_full_A[0].detach(
+                    # ).cpu(), self.dataset_A_mean, self.dataset_A_std).cpu()
+                    # fake_wav_full_A = decode_melspectrogram(self.vocoder, fake_mel_full_A[0].detach(
+                    # ).cpu(), self.dataset_A_mean, self.dataset_A_std).cpu()
+                    # real_wav_full_B = decode_melspectrogram(self.vocoder, real_mel_full_B[0].detach(
+                    # ).cpu(), self.dataset_B_mean, self.dataset_B_std).cpu()
+                    # fake_wav_full_B = decode_melspectrogram(self.vocoder, fake_mel_full_B[0].detach(
+                    # ).cpu(), self.dataset_B_mean, self.dataset_B_std).cpu()
+                    # self.logger.log_audio(
+                    #     real_wav_full_A.T, "real_speaker_A_audio", self.sample_rate)
+                    # self.logger.log_audio(
+                    #     fake_wav_full_A.T, "fake_speaker_A_audio", self.sample_rate)
+                    # self.logger.log_audio(
+                    #     real_wav_full_B.T, "real_speaker_B_audio", self.sample_rate)
+                    # self.logger.log_audio(
+                    #     fake_wav_full_B.T, "fake_speaker_B_audio", self.sample_rate)
 
             # Save each model checkpoint
             if self.logger.epoch % self.epochs_per_save == 0:
