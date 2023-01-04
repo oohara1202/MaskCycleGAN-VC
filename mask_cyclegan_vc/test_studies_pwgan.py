@@ -95,13 +95,12 @@ class MaskCycleGANVCTesting(object):
                 fake_B = self.generator(real_A, torch.ones_like(real_A))
 
                 denorm_converted = fake_B[0].detach().cpu() * self.dataset_B_std + self.dataset_B_mean
-                inputs = denorm_converted.unsqueeze(0)
+                denorm_converted = denorm_converted.T
 
                 # 元ファイルと同じファイル名にする
                 basename_noext = os.path.splitext(os.path.basename(filepath_list[i]))[0]
-                save_path = os.path.join(self.converted_audio_dir, f'{basename_noext}.pickle')
-                with open(save_path, 'wb') as f:
-                    pickle.dump(inputs.cpu(), f)  # [1, n_mels, sequence]
+                save_path = os.path.join(self.converted_audio_dir, basename_noext)
+                np.save(save_path, denorm_converted.cpu().detach().numpy())
 
             # else:
             #     real_B = sample
